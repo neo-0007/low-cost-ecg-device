@@ -1,4 +1,5 @@
 /*
+ * By: Hrishikesh Gohain
  * AD8232 ECG Acquisition + Moving Average Filter
  * Board: Arduino Due
  *
@@ -11,28 +12,34 @@
  * Moving average window: 5 samples
  */
 
-const int ECG_PIN = A0;
-const int LO_PLUS = 10;
-const int LO_MINUS = 11;
+// Pin definations
+#define ECG_PIN A0
+#define LO_PLUS 10
+#define LO_MINUS 11
 
-const unsigned long SAMPLE_INTERVAL_US = 4000; // 250 Hz
+// Sample rate : 4ms : 250 Hz
+#define SAMPLE_INTERVAL_US 4000
 
-const int MA_WINDOW = 5;
+// Window size for the mean average filter
+#define MA_WINDOW 5
+
 int buffer[MA_WINDOW];
 long bufferSum = 0;
 int bufferIndex = 0;
 int samplesInBuffer = 0;
 
 void setup() {
+    // UDP Baud rate should match this
     Serial.begin(115200);
 
-    // Arduino Due ADC: 12-bit -> 0 to 4095
+    // We need to set this otherwise it's 10bit by default
+    // Arduino Due ADC: 12-bit (0 to 4095)
     analogReadResolution(12);
 
     pinMode(LO_PLUS, INPUT);
     pinMode(LO_MINUS, INPUT);
 
-    // Initialize moving average buffer
+    // Initialize moving average buffer with 0
     for (int i = 0; i < MA_WINDOW; i++) {
         buffer[i] = 0;
     }
@@ -87,6 +94,7 @@ void loop() {
             (float)bufferSum / samplesInBuffer;
 
         // Print filtered ECG value
+        // This also streams to UDP so we can capture them
         Serial.println(filteredECG);
     }
 }
